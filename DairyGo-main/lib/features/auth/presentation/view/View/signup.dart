@@ -7,6 +7,8 @@ import '../../view_model/signup_viewmodel/signup_state.dart';
 import '../../view_model/signup_viewmodel/signup_viewmodel.dart';
 
 class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }

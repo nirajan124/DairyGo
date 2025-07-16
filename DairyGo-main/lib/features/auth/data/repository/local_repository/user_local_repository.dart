@@ -31,7 +31,7 @@ class UserLocalRepository implements IUserRepository {
       return Right(message);
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
-    };
+    }
     }
     
       @override

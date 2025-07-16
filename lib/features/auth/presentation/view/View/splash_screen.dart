@@ -10,6 +10,8 @@ import '../../view_model/login_viewmodel/login_viewmodel.dart';
 import 'login.dart';
 
 class SplashScreenView extends StatefulWidget {
+  const SplashScreenView({super.key});
+
   @override
   State<SplashScreenView> createState() => _SplashScreenViewState();
 }

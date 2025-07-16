@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'colors/themecolor.dart';
 
 ThemeData getApplicationTheme() {
-  final themecolor=new Themecolor();
+  final themecolor=Themecolor();
   return ThemeData(
       useMaterial3: false,
       primarySwatch: themecolor.customSwatch,

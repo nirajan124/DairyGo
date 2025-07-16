@@ -11,6 +11,8 @@ import '../view_model/splash_viewmodel.dart'; // <-- import lottie
 
 
 class SplashScreenView extends StatefulWidget {
+  const SplashScreenView({super.key});
+
   @override
   State<SplashScreenView> createState() => _SplashScreenViewState();
 }
