@@ -137,6 +137,49 @@ class ApiService {
     });
   }
 
+  Future<List<Map<String, dynamic>>> getOrders(String token) async {
+    final response = await safeApiCall(() async {
+      final res = await http.get(
+        Uri.parse('http://localhost:5000/api/v1/orders'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      return res;
+    });
+    final body = _processResponse(response);
+    if (body['data'] is List) {
+      return List<Map<String, dynamic>>.from(body['data']);
+    } else {
+      return [];
+    }
+  }
+
+  Future<void> placeOrder(String token, String productId, int quantity) async {
+    await safeApiCall(() async {
+      final res = await http.post(
+        Uri.parse('http://localhost:5000/api/v1/orders'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'productId': productId, 'quantity': quantity}),
+      );
+      _processResponse(res);
+      return res;
+    });
+  }
+
+  Future<Map<String, dynamic>> getOrderDetail(String token, String orderId) async {
+    final response = await safeApiCall(() async {
+      final res = await http.get(
+        Uri.parse('http://localhost:5000/api/v1/orders/$orderId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      return res;
+    });
+    final body = _processResponse(response);
+    return body['data'] ?? {};
+  }
+
   Map<String, dynamic> _processResponse(http.Response response) {
     final Map<String, dynamic> body = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
