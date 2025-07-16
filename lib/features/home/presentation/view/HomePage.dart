@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/data/repository/local_repository/user_local_repository.dart';
-import '../../../auth/domain/entity/user_entity.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/network/api_service.dart';
 import '../view_model/homepage_viewmodel.dart';
 
 class HomePage extends StatefulWidget {
@@ -61,156 +61,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isDarkMode = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  UserEntity? user;
+  String? userId;
+  String? token;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchUser();
+    _fetchProfile();
   }
 
-  Future<void> _fetchUser() async {
-    final repo = UserLocalRepository(dataSource: UserHiveDataSource(hiveService: HiveService()));
-    final result = await repo.getCurrentUser();
-    result.fold(
-      (failure) {
-        setState(() {
-          isLoading = false;
-        });
-      },
-      (userData) {
-        setState(() {
-          user = userData;
-          nameController.text = userData.username;
-          emailController.text = userData.email;
-          isLoading = false;
-        });
-      },
-    );
+  Future<void> _fetchProfile() async {
+    setState(() { isLoading = true; });
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('jwt_token');
+    userId = prefs.getString('user_id');
+    if (token == null || userId == null) {
+      setState(() { isLoading = false; });
+      return;
+    }
+    try {
+      final response = await ApiService().getProfile(userId!, token!);
+      nameController.text = response['fname'] ?? '';
+      emailController.text = response['email'] ?? '';
+    } catch (e) {
+      // Handle error
+    }
+    setState(() { isLoading = false; });
   }
 
-  void _saveProfile() {
-    setState(() {
-      if (user != null) {
-        user = UserEntity(
-          userId: user!.userId,
-          email: emailController.text,
-          username: nameController.text,
-          password: user!.password,
-        );
-      }
-      isEditing = false;
-    });
-    // TODO: Save updated user to Hive
+  Future<void> _saveProfile() async {
+    if (token == null || userId == null) return;
+    setState(() { isLoading = true; });
+    try {
+      await ApiService().updateProfile(
+        userId: userId!,
+        token: token!,
+        fname: nameController.text,
+        email: emailController.text,
+      );
+      setState(() { isEditing = false; });
+    } catch (e) {
+      // Handle error
+    }
+    setState(() { isLoading = false; });
   }
 
   @override
   Widget build(BuildContext context) {
     return isLoading
         ? Center(child: CircularProgressIndicator())
-        : BlocProvider(
-            create: (_) => HomeViewModel(),
-            child: Builder(
-              builder: (context) => SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 24),
+                Stack(
+                  alignment: Alignment.bottomRight,
                   children: [
-                    SizedBox(height: 24),
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage: AssetImage('assets/images/profile.jpg'),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () {
-                              // TODO: Implement profile picture update
-                            },
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.blue,
-                              child: Icon(Icons.edit, color: Colors.white, size: 18),
-                            ),
-                          ),
-                        ),
-                      ],
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage('assets/images/profile.jpg'),
                     ),
-                    SizedBox(height: 16),
-                    isEditing
-                        ? TextField(
-                            controller: nameController,
-                            decoration: InputDecoration(labelText: 'Name'),
-                          )
-                        : Text(nameController.text, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    isEditing
-                        ? TextField(
-                            controller: emailController,
-                            decoration: InputDecoration(labelText: 'Email'),
-                          )
-                        : Text(emailController.text, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            if (isEditing) {
-                              _saveProfile();
-                            } else {
-                              setState(() {
-                                isEditing = true;
-                              });
-                            }
-                          },
-                          child: Text(isEditing ? 'Save' : 'Edit Profile'),
+                    Positioned(
+                      bottom: 0,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () {
+                          // TODO: Implement profile picture update
+                        },
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.blue,
+                          child: Icon(Icons.edit, color: Colors.white, size: 18),
                         ),
-                        if (isEditing)
-                          SizedBox(width: 12),
-                        if (isEditing)
-                          OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                isEditing = false;
-                                nameController.text = user?.username ?? '';
-                                emailController.text = user?.email ?? '';
-                              });
-                            },
-                            child: Text('Cancel'),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 32),
-                    SwitchListTile(
-                      title: Text('Dark Mode'),
-                      value: isDarkMode,
-                      onChanged: (val) {
-                        setState(() {
-                          isDarkMode = val;
-                          // TODO: Implement actual theme switching
-                        });
-                      },
-                      secondary: Icon(Icons.brightness_6),
-                    ),
-                    SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await context.read<HomeViewModel>().logout();
-                        // TODO: Navigate to login screen after logout
-                      },
-                      icon: Icon(Icons.logout),
-                      label: Text('Logout'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      ),
                     ),
                   ],
                 ),
-              ),
+                SizedBox(height: 16),
+                isEditing
+                    ? TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(labelText: 'Name'),
+                      )
+                    : Text(nameController.text, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                isEditing
+                    ? TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(labelText: 'Email'),
+                      )
+                    : Text(emailController.text, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        if (isEditing) {
+                          _saveProfile();
+                        } else {
+                          setState(() {
+                            isEditing = true;
+                          });
+                        }
+                      },
+                      child: Text(isEditing ? 'Save' : 'Edit Profile'),
+                    ),
+                    if (isEditing)
+                      SizedBox(width: 12),
+                    if (isEditing)
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            isEditing = false;
+                            _fetchProfile();
+                          });
+                        },
+                        child: Text('Cancel'),
+                      ),
+                  ],
+                ),
+                SizedBox(height: 32),
+                SwitchListTile(
+                  title: Text('Dark Mode'),
+                  value: isDarkMode,
+                  onChanged: (val) {
+                    setState(() {
+                      isDarkMode = val;
+                      // TODO: Implement actual theme switching
+                    });
+                  },
+                  secondary: Icon(Icons.brightness_6),
+                ),
+                SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // TODO: Implement logout logic
+                  },
+                  icon: Icon(Icons.logout),
+                  label: Text('Logout'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                ),
+              ],
             ),
           );
   }
