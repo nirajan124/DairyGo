@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static const String baseUrl = 'http://localhost:5000/api/v1/auth'; // Change to your backend URL
@@ -75,8 +77,31 @@ class ApiService {
     final Map<String, dynamic> body = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      // Token expired or invalid, clear session and redirect to login
+      _handleSessionExpired();
+      throw Exception('Session expired. Please log in again.');
     } else {
       throw Exception(body['message'] ?? 'Unknown error');
+    }
+  }
+
+  void _handleSessionExpired() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
+    await prefs.remove('user_id');
+    // Optionally, use a global navigator key to redirect to login
+    // navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
+  // Wrap all API calls in try/catch for network errors
+  Future<T> safeApiCall<T>(Future<T> Function() apiCall) async {
+    try {
+      return await apiCall();
+    } on SocketException {
+      throw Exception('No internet connection.');
+    } catch (e) {
+      rethrow;
     }
   }
 } 

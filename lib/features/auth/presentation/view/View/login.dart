@@ -31,10 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
     try {
-      final response = await ApiService().login(
+      final response = await ApiService().safeApiCall(() => ApiService().login(
         emailController.text.trim(),
         passwordController.text.trim(),
-      );
+      ));
       final token = response['token'];
       final userId = response['userId'];
       if (token != null && userId != null) {
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSnackBar('Invalid response from server', isError: true);
       }
     } catch (e) {
-      _showSnackBar(e.toString(), isError: true);
+      _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
     }
     setState(() { isLoading = false; });
   }

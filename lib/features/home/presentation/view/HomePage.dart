@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
     try {
-      final response = await ApiService().getProfile(userId!, token!);
+      final response = await ApiService().safeApiCall(() => ApiService().getProfile(userId!, token!));
       fnameController.text = response['fname'] ?? '';
       lnameController.text = response['lname'] ?? '';
       phoneController.text = response['phone'] ?? '';
@@ -95,7 +95,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       emailController.text = response['email'] ?? '';
       // TODO: Load profile image if available
     } catch (e) {
-      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+      );
     }
     setState(() { isLoading = false; });
   }
@@ -114,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (token == null || userId == null) return;
     setState(() { isLoading = true; });
     try {
-      await ApiService().updateProfile(
+      await ApiService().safeApiCall(() => ApiService().updateProfile(
         userId: userId!,
         token: token!,
         fname: fnameController.text,
@@ -122,10 +124,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         phone: phoneController.text,
         email: emailController.text,
         imagePath: profileImagePath,
-      );
+      ));
       setState(() { isEditing = false; });
     } catch (e) {
-      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+      );
     }
     setState(() { isLoading = false; });
   }

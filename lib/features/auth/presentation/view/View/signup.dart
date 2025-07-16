@@ -34,13 +34,13 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
     try {
-      final response = await ApiService().register(
+      final response = await ApiService().safeApiCall(() => ApiService().register(
         fname: fnameController.text.trim(),
         lname: lnameController.text.trim(),
         phone: phoneController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
-      );
+      ));
       _showSnackBar('Registration Successful!');
       emailController.clear();
       usernameController.clear();
@@ -51,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
       // TODO: Navigate to login or home screen
       Navigator.pop(context); // Go back to login
     } catch (e) {
-      _showSnackBar(e.toString(), isError: true);
+      _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
     }
     setState(() { isLoading = false; });
   }
