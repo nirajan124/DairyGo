@@ -95,6 +95,48 @@ class ApiService {
     return body['data'] ?? {};
   }
 
+  Future<List<Map<String, dynamic>>> getWishlist(String token) async {
+    final response = await safeApiCall(() async {
+      final res = await http.get(
+        Uri.parse('http://localhost:5000/api/v1/wishlist'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      return res;
+    });
+    final body = _processResponse(response);
+    if (body['data'] is List) {
+      return List<Map<String, dynamic>>.from(body['data']);
+    } else {
+      return [];
+    }
+  }
+
+  Future<void> addToWishlist(String token, String productId) async {
+    await safeApiCall(() async {
+      final res = await http.post(
+        Uri.parse('http://localhost:5000/api/v1/wishlist'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'productId': productId}),
+      );
+      _processResponse(res);
+      return res;
+    });
+  }
+
+  Future<void> removeFromWishlist(String token, String productId) async {
+    await safeApiCall(() async {
+      final res = await http.delete(
+        Uri.parse('http://localhost:5000/api/v1/wishlist/$productId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      _processResponse(res);
+      return res;
+    });
+  }
+
   Map<String, dynamic> _processResponse(http.Response response) {
     final Map<String, dynamic> body = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
