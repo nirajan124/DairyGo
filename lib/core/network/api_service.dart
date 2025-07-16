@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class ApiService {
   static const String baseUrl = 'http://localhost:5000/api/v1/auth'; // Change to your backend URL
@@ -50,19 +51,23 @@ class ApiService {
     required String userId,
     required String token,
     required String fname,
+    required String lname,
+    required String phone,
     required String email,
+    String? imagePath,
   }) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/updateCustomer/$userId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'fname': fname,
-        'email': email,
-      }),
-    );
+    var uri = Uri.parse('$baseUrl/updateCustomer/$userId');
+    var request = http.MultipartRequest('PUT', uri);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['fname'] = fname;
+    request.fields['lname'] = lname;
+    request.fields['phone'] = phone;
+    request.fields['email'] = email;
+    if (imagePath != null) {
+      request.files.add(await http.MultipartFile.fromPath('profilePicture', imagePath));
+    }
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
     _processResponse(response);
   }
 

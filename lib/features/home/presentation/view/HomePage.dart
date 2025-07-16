@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/network/api_service.dart';
 import '../view_model/homepage_viewmodel.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,6 +63,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isDarkMode = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController fnameController = TextEditingController();
+  TextEditingController lnameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  String? profileImagePath;
   String? userId;
   String? token;
   bool isLoading = true;
@@ -82,12 +88,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     try {
       final response = await ApiService().getProfile(userId!, token!);
+      fnameController.text = response['fname'] ?? '';
+      lnameController.text = response['lname'] ?? '';
+      phoneController.text = response['phone'] ?? '';
       nameController.text = response['fname'] ?? '';
       emailController.text = response['email'] ?? '';
+      // TODO: Load profile image if available
     } catch (e) {
       // Handle error
     }
     setState(() { isLoading = false; });
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        profileImagePath = pickedFile.path;
+      });
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -97,8 +117,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await ApiService().updateProfile(
         userId: userId!,
         token: token!,
-        fname: nameController.text,
+        fname: fnameController.text,
+        lname: lnameController.text,
+        phone: phoneController.text,
         email: emailController.text,
+        imagePath: profileImagePath,
       );
       setState(() { isEditing = false; });
     } catch (e) {
@@ -122,15 +145,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage('assets/images/profile.jpg'),
+                      backgroundImage: profileImagePath != null
+                        ? FileImage(File(profileImagePath!))
+                        : AssetImage('assets/images/profile.jpg') as ImageProvider,
                     ),
                     Positioned(
                       bottom: 0,
                       right: 4,
                       child: GestureDetector(
-                        onTap: () {
-                          // TODO: Implement profile picture update
-                        },
+                        onTap: _pickImage,
                         child: CircleAvatar(
                           radius: 16,
                           backgroundColor: Colors.blue,
@@ -141,6 +164,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 SizedBox(height: 16),
+                isEditing
+                    ? TextField(
+                        controller: fnameController,
+                        decoration: InputDecoration(labelText: 'First Name'),
+                      )
+                    : Text(fnameController.text, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                isEditing
+                    ? TextField(
+                        controller: lnameController,
+                        decoration: InputDecoration(labelText: 'Last Name'),
+                      )
+                    : Text(lnameController.text, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                SizedBox(height: 8),
+                isEditing
+                    ? TextField(
+                        controller: phoneController,
+                        decoration: InputDecoration(labelText: 'Phone'),
+                      )
+                    : Text(phoneController.text, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                SizedBox(height: 8),
                 isEditing
                     ? TextField(
                         controller: nameController,
