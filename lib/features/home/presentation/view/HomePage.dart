@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _pages.addAll([
       ProductListScreen(),
-      Center(child: Text('Friends', style: TextStyle(fontSize: 24))),
+      WishlistScreen(),
       Center(child: Text('Messages', style: TextStyle(fontSize: 24))),
       ProfileScreen(),
     ]);
@@ -355,6 +355,68 @@ class ProductDetailScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class WishlistScreen extends StatefulWidget {
+  @override
+  _WishlistScreenState createState() => _WishlistScreenState();
+}
+
+class _WishlistScreenState extends State<WishlistScreen> {
+  late Future<List<Map<String, dynamic>>> _wishlistFuture;
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWishlist();
+  }
+
+  Future<void> _loadWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('jwt_token');
+    setState(() {
+      _wishlistFuture = token != null
+          ? ApiService().getWishlist(token!)
+          : Future.value([]);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _wishlistFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: \\${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No wishlist items.'));
+        }
+        final wishlist = snapshot.data!;
+        return ListView.builder(
+          itemCount: wishlist.length,
+          itemBuilder: (context, index) {
+            final item = wishlist[index];
+            return ListTile(
+              title: Text(item['name'] ?? 'No Name'),
+              subtitle: Text(item['description'] ?? ''),
+              trailing: IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () async {
+                  if (token != null && item['_id'] != null) {
+                    await ApiService().removeFromWishlist(token!, item['_id']);
+                    _loadWishlist();
+                  }
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
