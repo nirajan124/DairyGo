@@ -1,7 +1,5 @@
 import 'package:get_it/get_it.dart';
 
-import '../../core/network/hive_service.dart';
-import '../../features/auth/data/data_source/local_datasource/user_hive_data_source.dart';
 import '../../features/auth/data/data_source/user_data_source.dart';
 import '../../features/auth/data/repository/local_repository/user_local_repository.dart';
 import '../../features/auth/domain/repository/user_repository.dart';
@@ -15,19 +13,15 @@ import '../../features/splash/presentation/view_model/splash_viewmodel.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
-  await _initHiveService();
-  await _initSplashModule();
   await _initAuthModule();
   await _initHomeModule();
 }
 
-Future<void> _initHiveService() async {
-  serviceLocator.registerLazySingleton(() => HiveService());
-}
-
 Future<void> _initAuthModule() async {
   serviceLocator.registerLazySingleton<IUserDataSource>(
-    () => UserHiveDataSource(hiveService: serviceLocator<HiveService>()),
+    () => UserLocalRepository(
+      dataSource: serviceLocator<IUserDataSource>(),
+    ),
   );
 
   serviceLocator.registerLazySingleton<IUserRepository>(

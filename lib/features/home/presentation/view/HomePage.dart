@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/data/repository/local_repository/user_local_repository.dart';
-import '../../../auth/data/data_source/local_datasource/user_hive_data_source.dart';
 import '../../../auth/domain/entity/user_entity.dart';
 import '../view_model/homepage_viewmodel.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
