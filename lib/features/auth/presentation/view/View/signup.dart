@@ -61,30 +61,30 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/signup.png'),
-            fit: BoxFit.fill,
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 60),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Sign Up',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 30),
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/signup.png'),
+                fit: BoxFit.fill,
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 60),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
                 TextFormField(
                   controller: fnameController,
                   decoration: InputDecoration(
@@ -111,26 +111,26 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   validator: (val) => val == null || val.isEmpty ? 'Enter phone' : null,
                 ),
-                const SizedBox(height: 20),
+                    const SizedBox(height: 20),
                 TextFormField(
-                  controller: emailController,
+                      controller: emailController,
                   decoration: InputDecoration(
                     hintText: 'Enter Email',
                     prefixIcon: Icon(Icons.email),
                   ),
-                  validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
-                ),
-                const SizedBox(height: 20),
+                      validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
+                    ),
+                    const SizedBox(height: 20),
                 TextFormField(
-                  controller: passwordController,
+                      controller: passwordController,
                   decoration: InputDecoration(
                     hintText: 'Enter Password',
                     prefixIcon: Icon(Icons.lock),
                   ),
-                  obscureText: true,
+                      obscureText: true,
                   validator: (val) => val == null || val.isEmpty ? 'Enter password' : null,
-                ),
-                const SizedBox(height: 30),
+                    ),
+                    const SizedBox(height: 30),
                 isLoading
                     ? CircularProgressIndicator()
                     : ElevatedButton(

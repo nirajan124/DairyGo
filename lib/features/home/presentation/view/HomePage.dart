@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
     _pages.addAll([
       ProductListScreen(),
       WishlistScreen(),
-      Center(child: Text('Messages', style: TextStyle(fontSize: 24))),
+      OrdersScreen(),
       ProfileScreen(),
     ]);
   }
@@ -413,6 +413,60 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   }
                 },
               ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class OrdersScreen extends StatefulWidget {
+  @override
+  _OrdersScreenState createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  late Future<List<Map<String, dynamic>>> _ordersFuture;
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrders();
+  }
+
+  Future<void> _loadOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('jwt_token');
+    setState(() {
+      _ordersFuture = token != null
+          ? ApiService().getOrders(token!)
+          : Future.value([]);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _ordersFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: \\${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No orders found.'));
+        }
+        final orders = snapshot.data!;
+        return ListView.builder(
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            return ListTile(
+              title: Text('Order #${order['_id'] ?? ''}'),
+              subtitle: Text('Product: ${order['product']?['name'] ?? ''}\nQuantity: ${order['quantity'] ?? ''}'),
+              // Add more order details as needed
             );
           },
         );
