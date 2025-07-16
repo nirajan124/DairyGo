@@ -73,6 +73,28 @@ class ApiService {
     _processResponse(response);
   }
 
+  Future<List<Map<String, dynamic>>> getProducts() async {
+    final response = await safeApiCall(() async {
+      final res = await http.get(Uri.parse('http://localhost:5000/api/v1/products'));
+      return res;
+    });
+    final body = _processResponse(response);
+    if (body['data'] is List) {
+      return List<Map<String, dynamic>>.from(body['data']);
+    } else {
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> getProductDetail(String productId) async {
+    final response = await safeApiCall(() async {
+      final res = await http.get(Uri.parse('http://localhost:5000/api/v1/products/$productId'));
+      return res;
+    });
+    final body = _processResponse(response);
+    return body['data'] ?? {};
+  }
+
   Map<String, dynamic> _processResponse(http.Response response) {
     final Map<String, dynamic> body = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {

@@ -17,12 +17,18 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   // Pages for each tab
-  final List<Widget> _pages = [
-    Center(child: Text('Home', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Friends', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Messages', style: TextStyle(fontSize: 24))),
-    ProfileScreen(),
-  ];
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _pages.addAll([
+      ProductListScreen(),
+      Center(child: Text('Friends', style: TextStyle(fontSize: 24))),
+      Center(child: Text('Messages', style: TextStyle(fontSize: 24))),
+      ProfileScreen(),
+    ]);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -260,5 +266,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           );
+  }
+}
+
+class ProductListScreen extends StatefulWidget {
+  @override
+  _ProductListScreenState createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
+  late Future<List<Map<String, dynamic>>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsFuture = ApiService().getProducts();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _productsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: \\${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No products found.'));
+        }
+        final products = snapshot.data!;
+        return ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return ListTile(
+              title: Text(product['name'] ?? 'No Name'),
+              subtitle: Text(product['description'] ?? ''),
+            );
+          },
+        );
+      },
+    );
   }
 }
