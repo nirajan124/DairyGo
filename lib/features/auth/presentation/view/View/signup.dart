@@ -49,6 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
       lnameController.clear();
       phoneController.clear();
       // TODO: Navigate to login or home screen
+      Navigator.pop(context); // Go back to login
     } catch (e) {
       _showSnackBar(e.toString(), isError: true);
     }

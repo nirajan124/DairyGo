@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../../core/network/api_service.dart';
+// TODO: import '../../../home/presentation/view/HomePage.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -42,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('user_id', userId);
         _showSnackBar('Login Successful');
         // TODO: Navigate to home screen
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         _showSnackBar('Invalid response from server', isError: true);
       }
