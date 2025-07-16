@@ -199,7 +199,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    // TODO: Implement logout logic
+                    // Implement logout logic
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('jwt_token');
+                    await prefs.remove('user_id');
+                    Navigator.pushReplacementNamed(context, '/login');
                   },
                   icon: Icon(Icons.logout),
                   label: Text('Logout'),
