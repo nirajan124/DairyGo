@@ -303,10 +303,58 @@ class _ProductListScreenState extends State<ProductListScreen> {
             return ListTile(
               title: Text(product['name'] ?? 'No Name'),
               subtitle: Text(product['description'] ?? ''),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailScreen(productId: product['_id']),
+                  ),
+                );
+              },
             );
           },
         );
       },
+    );
+  }
+}
+
+class ProductDetailScreen extends StatelessWidget {
+  final String productId;
+  const ProductDetailScreen({required this.productId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Product Details')),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: ApiService().getProductDetail(productId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: \\${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('Product not found.'));
+          }
+          final product = snapshot.data!;
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(product['name'] ?? '', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                Text(product['description'] ?? ''),
+                SizedBox(height: 8),
+                if (product['price'] != null)
+                  Text('Price: \\${product['price']}', style: TextStyle(fontSize: 18)),
+                // Add more fields as needed
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
