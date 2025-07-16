@@ -301,6 +301,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
           itemBuilder: (context, index) {
             final product = products[index];
             return ListTile(
+              leading: product['image'] != null
+                  ? Image.network(product['image'], width: 48, height: 48, fit: BoxFit.cover)
+                  : Icon(Icons.image, size: 48),
               title: Text(product['name'] ?? 'No Name'),
               subtitle: Text(product['description'] ?? ''),
               onTap: () {
@@ -325,6 +328,7 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final quantityController = TextEditingController(text: '1');
     return Scaffold(
       appBar: AppBar(title: Text('Product Details')),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -343,13 +347,61 @@ class ProductDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (product['image'] != null)
+                  Center(
+                    child: Image.network(product['image'], width: 200, height: 200, fit: BoxFit.cover),
+                  ),
+                SizedBox(height: 16),
                 Text(product['name'] ?? '', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 Text(product['description'] ?? ''),
                 SizedBox(height: 8),
                 if (product['price'] != null)
                   Text('Price: \\${product['price']}', style: TextStyle(fontSize: 18)),
-                // Add more fields as needed
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text('Quantity:'),
+                    SizedBox(width: 8),
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        controller: quantityController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final token = prefs.getString('jwt_token');
+                    if (token == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('You must be logged in to place an order.'), backgroundColor: Colors.red),
+                      );
+                      return;
+                    }
+                    int qty = int.tryParse(quantityController.text) ?? 1;
+                    try {
+                      await ApiService().placeOrder(token, productId, qty);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Order placed successfully!'), backgroundColor: Colors.green),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+                      );
+                    }
+                  },
+                  child: Text('Place Order'),
+                ),
               ],
             ),
           );
