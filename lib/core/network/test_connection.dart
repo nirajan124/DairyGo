@@ -1,0 +1,22 @@
+import 'package:dio/dio.dart';
+import 'api_endpoints.dart';
+
+class ConnectionTest {
+  static Future<bool> testBackendConnection() async {
+    try {
+      final dio = Dio(BaseOptions(
+        baseUrl: ApiEndpoints.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ));
+
+      // Test a simple GET request to check if server is reachable
+      final response = await dio.get('/customers');
+      print('Backend connection test successful: ${response.statusCode}');
+      return true;
+    } catch (e) {
+      print('Backend connection test failed: $e');
+      return false;
+    }
+  }
+} 
