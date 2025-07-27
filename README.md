@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Dairy Go
+=======
+# trek
+>>>>>>> master
 
 A new Flutter project.
 
