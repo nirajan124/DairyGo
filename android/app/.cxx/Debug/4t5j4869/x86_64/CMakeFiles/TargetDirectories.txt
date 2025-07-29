@@ -1,0 +1,2 @@
+D:/trek/android/app/.cxx/Debug/4t5j4869/x86_64/CMakeFiles/edit_cache.dir
+D:/trek/android/app/.cxx/Debug/4t5j4869/x86_64/CMakeFiles/rebuild_cache.dir
