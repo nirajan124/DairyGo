@@ -20,8 +20,8 @@ void main() {
 
   const tUserEntity = UserEntity(
     id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
+    firstName: 'Nirajan',
+    lastName: 'Bhattarai',
     email: 'test@example.com',
     phone: '1234567890',
     password: 'password123',
