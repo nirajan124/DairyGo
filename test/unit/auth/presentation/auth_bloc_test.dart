@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+
 import 'package:dairygo/features/auth/domain/entities/user_entity.dart';
 import 'package:dairygo/features/auth/domain/repositories/auth_repository.dart';
 import 'package:dairygo/features/auth/presentation/bloc/auth_bloc.dart';
