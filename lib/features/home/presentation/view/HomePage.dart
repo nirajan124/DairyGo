@@ -101,11 +101,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       emailController.text = response['email'] ?? '';
       // TODO: Load profile image if available
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+        );
+      }
     }
-    setState(() { isLoading = false; });
+    if (mounted) {
+      setState(() { isLoading = false; });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -131,13 +135,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         email: emailController.text,
         imagePath: profileImagePath,
       );
-      setState(() { isEditing = false; });
+      if (mounted) {
+        setState(() { isEditing = false; });
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+        );
+      }
     }
-    setState(() { isLoading = false; });
+    if (mounted) {
+      setState(() { isLoading = false; });
+    }
   }
 
   @override

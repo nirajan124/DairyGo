@@ -32,26 +32,32 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
     try {
-      final response = await ApiService().safeApiCall(() => ApiService().register(
+      await ApiService().safeApiCall(() => ApiService().register(
         fname: fnameController.text.trim(),
         lname: lnameController.text.trim(),
         phone: phoneController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       ));
-      _showSnackBar('Registration Successful!');
-      emailController.clear();
-      usernameController.clear();
-      passwordController.clear();
-      fnameController.clear();
-      lnameController.clear();
-      phoneController.clear();
-      // TODO: Navigate to login or home screen
-      Navigator.pop(context); // Go back to login
+      if (mounted) {
+        _showSnackBar('Registration Successful!');
+        emailController.clear();
+        usernameController.clear();
+        passwordController.clear();
+        fnameController.clear();
+        lnameController.clear();
+        phoneController.clear();
+        // TODO: Navigate to login or home screen
+        Navigator.pop(context); // Go back to login
+      }
     } catch (e) {
-      _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      if (mounted) {
+        _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
     }
-    setState(() { isLoading = false; });
+    if (mounted) {
+      setState(() { isLoading = false; });
+    }
   }
 
   @override

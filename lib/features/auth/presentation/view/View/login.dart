@@ -44,16 +44,24 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwt_token', token);
         await prefs.setString('user_id', userId);
-        _showSnackBar('Login Successful');
-        // TODO: Navigate to home screen
-        Navigator.pushReplacementNamed(context, '/home');
+        if (mounted) {
+          _showSnackBar('Login Successful');
+          // TODO: Navigate to home screen
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } else {
-        _showSnackBar('Invalid response from server', isError: true);
+        if (mounted) {
+          _showSnackBar('Invalid response from server', isError: true);
+        }
       }
     } catch (e) {
-      _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      if (mounted) {
+        _showSnackBar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
     }
-    setState(() { isLoading = false; });
+    if (mounted) {
+      setState(() { isLoading = false; });
+    }
   }
 
   @override
