@@ -6,9 +6,9 @@ class ProductRemoteDataSource {
 
   Future<List<Map<String, dynamic>>> fetchProducts() async {
     final response = await _dio.get(ApiEndpoints.products);
-    print('Product API response: ${response.data}');
+    // Product API response: ${response.data}
     final data = response.data;
-    print('data.runtimeType: ${data.runtimeType}');
+    // data.runtimeType: ${data.runtimeType}
     if (data is List) {
       return List<Map<String, dynamic>>.from(data);
     } else if (data is Map && data['data'] is List) {

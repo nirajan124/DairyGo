@@ -15,7 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     // Check authentication status after a short delay
     Future.delayed(const Duration(seconds: 2), () {
-      context.read<AuthBloc>().add(CheckAuthStatus());
+      if (mounted) {
+        context.read<AuthBloc>().add(CheckAuthStatus());
+      }
     });
   }
 

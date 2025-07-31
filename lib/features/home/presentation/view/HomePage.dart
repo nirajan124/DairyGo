@@ -534,11 +534,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   if (token != null && item['_id'] != null) {
                     try {
                       await ApiService().removeFromWishlist(item['_id']);
-                      _loadWishlist();
+                      if (mounted) {
+                        _loadWishlist();
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to remove item: $e')),
-                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to remove item: $e')),
+                        );
+                      }
                     }
                   }
                 },

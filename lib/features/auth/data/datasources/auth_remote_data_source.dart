@@ -26,7 +26,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'role': user.role,
     };
     try {
-      print('Registration request data: $data');
+      // Registration request data: $data
       final response = await _apiService.post(
         ApiEndpoints.register,
         data: data,
@@ -44,9 +44,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Registration failed');
       }
     } on DioException catch (e) {
-      print('Registration error response: ${e.response?.data}');
-      print('Registration error type: ${e.type}');
-      print('Registration error message: ${e.message}');
+      // Registration error response: ${e.response?.data}
+      // Registration error type: ${e.type}
+      // Registration error message: ${e.message}
       
       final errorData = e.response?.data;
       String errorMessage = 'Registration failed';
@@ -66,7 +66,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       
       // Print the full error data for debugging
-      print('Full backend error: $errorData');
+      // Full backend error: $errorData
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception('Registration failed: ${e.toString()}');
@@ -102,9 +102,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Login failed');
       }
     } on DioException catch (e) {
-      print('Login error response: ${e.response?.data}');
-      print('Login error type: ${e.type}');
-      print('Login error message: ${e.message}');
+      // Login error response: ${e.response?.data}
+      // Login error type: ${e.type}
+      // Login error message: ${e.message}
       
       final errorData = e.response?.data;
       String errorMessage = 'Login failed';
