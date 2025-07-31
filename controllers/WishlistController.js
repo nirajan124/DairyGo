@@ -123,7 +123,15 @@ exports.deleteWishlistItem = async (req, res) => {
         return res.status(404).json({ success: false, message: "Wishlist not found" });
       }
   
-      
+      // Check if product exists in wishlist
+      const productIndex = wishlist.products.findIndex(p => p._id.toString() === productId);
+      if (productIndex === -1) {
+        return res.status(404).json({ success: false, message: "Product not found in wishlist" });
+      }
+  
+      // Remove product from wishlist array
+      wishlist.products.splice(productIndex, 1);
+      await wishlist.save();
   
       res.status(200).json({ success: true, message: "Product deleted from wishlist" });
     } catch (error) {
