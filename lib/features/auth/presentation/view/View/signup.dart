@@ -32,7 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
     try {
-      await ApiService().safeApiCall(() => ApiService().register(
+      final response = await ApiService().safeApiCall(() => ApiService().register(
         fname: fnameController.text.trim(),
         lname: lnameController.text.trim(),
         phone: phoneController.text.trim(),

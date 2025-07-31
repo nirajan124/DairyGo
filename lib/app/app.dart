@@ -1,23 +1,30 @@
 
-import 'package:dairygo/app/service_locator/service_locator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../features/splash/presentation/view/SplashScreenView.dart';
-import '../features/splash/presentation/view_model/splash_viewmodel.dart';
+import '../features/auth/presentation/view/View/login.dart';
+import '../features/auth/presentation/view/View/signup.dart';
+import '../features/home/presentation/view/HomePage.dart';
 
-
-class App extends StatelessWidget {
-  const App({super.key});
+class DairyGoApp extends StatelessWidget {
+  const DairyGoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Dairy Go',
       debugShowCheckedModeBanner: false,
-      home: BlocProvider<SplashViewModel>(
-        create: (_) => serviceLocator<SplashViewModel>(),
-        child: SplashScreenView(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: 'Opensans Regular',
       ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreenView(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }
