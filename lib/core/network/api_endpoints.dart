@@ -11,6 +11,10 @@ class ApiEndpoints {
   static const String updateCustomer = '/customers/updateCustomer';
   static const String uploadImage = '/customers/uploadImage';
 
+  // Product endpoints
+  static const String products = '/products';
+  static const String productById = '/products/';
+
   // Package/Trip endpoints
   static const String packages = '/package';
   static const String packageById = '/package/';

@@ -62,6 +62,50 @@ class ApiService {
     // You can add navigation logic here if needed
   }
 
+  // Login method
+  Future<Response> login(String email, String password) async {
+    try {
+      final response = await _dio.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+      });
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Register method
+  Future<Response> register({
+    required String fname,
+    required String lname,
+    required String phone,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post('/auth/register', data: {
+        'fname': fname,
+        'lname': lname,
+        'phone': phone,
+        'email': email,
+        'password': password,
+      });
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Safe API call wrapper
+  Future<T> safeApiCall<T>(Future<T> Function() apiCall) async {
+    try {
+      return await apiCall();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // GET request
   Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
     try {
