@@ -5,7 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:dairygo/features/auth/domain/entities/user_entity.dart';
 import 'package:dairygo/features/auth/domain/repositories/auth_repository.dart';
 import 'package:dairygo/features/auth/presentation/bloc/auth_bloc.dart';
-import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'auth_bloc_test.mocks.dart';
 
