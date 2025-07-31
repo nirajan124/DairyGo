@@ -5,7 +5,7 @@ import '../../../../../../core/network/api_service.dart';
 // TODO: import '../../../home/presentation/view/HomePage.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
