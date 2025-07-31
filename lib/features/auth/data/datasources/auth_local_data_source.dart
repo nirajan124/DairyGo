@@ -1,4 +1,5 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 abstract class AuthLocalDataSource {
@@ -10,51 +11,84 @@ abstract class AuthLocalDataSource {
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  static const String usersBoxName = 'usersBox';
+  static const String usersKey = 'users';
 
   @override
   Future<void> registerUser(UserModel user) async {
-    final box = await Hive.openBox<UserModel>(usersBoxName);
-    if (box.values.any((u) => u.email == user.email)) {
-      throw Exception('User already exists');
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getStringList(usersKey) ?? [];
+    
+    // Check if user already exists
+    for (String userJson in usersJson) {
+      final existingUser = UserModel.fromJson(jsonDecode(userJson));
+      if (existingUser.email == user.email) {
+        throw Exception('User already exists');
+      }
     }
-    await box.add(user);
+    
+    usersJson.add(jsonEncode(user.toJson()));
+    await prefs.setStringList(usersKey, usersJson);
   }
 
   @override
   Future<UserModel?> authenticateUser(String email, String password) async {
-    final box = await Hive.openBox<UserModel>(usersBoxName);
-    try {
-      return box.values.firstWhere((u) => u.email == email && u.password == password);
-    } catch (_) {
-      return null;
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getStringList(usersKey) ?? [];
+    
+    for (String userJson in usersJson) {
+      final user = UserModel.fromJson(jsonDecode(userJson));
+      if (user.email == email && user.password == password) {
+        return user;
+      }
     }
+    return null;
   }
 
   @override
   Future<UserModel?> getUserByEmail(String email) async {
-    final box = await Hive.openBox<UserModel>(usersBoxName);
-    try {
-      return box.values.firstWhere((u) => u.email == email);
-    } catch (_) {
-      return null;
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getStringList(usersKey) ?? [];
+    
+    for (String userJson in usersJson) {
+      final user = UserModel.fromJson(jsonDecode(userJson));
+      if (user.email == email) {
+        return user;
+      }
     }
+    return null;
   }
 
   @override
   Future<void> updateUser(UserModel user) async {
-    final box = await Hive.openBox<UserModel>(usersBoxName);
-    final existingUser = await getUserByEmail(user.email);
-    if (existingUser != null) {
-      final index = box.values.toList().indexOf(existingUser);
-      await box.putAt(index, user);
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getStringList(usersKey) ?? [];
+    final updatedUsersJson = <String>[];
+    
+    for (String userJson in usersJson) {
+      final existingUser = UserModel.fromJson(jsonDecode(userJson));
+      if (existingUser.email == user.email) {
+        updatedUsersJson.add(jsonEncode(user.toJson()));
+      } else {
+        updatedUsersJson.add(userJson);
+      }
     }
+    
+    await prefs.setStringList(usersKey, updatedUsersJson);
   }
 
   @override
   Future<void> deleteUser(String userId) async {
-    final box = await Hive.openBox<UserModel>(usersBoxName);
-    final user = box.values.firstWhere((u) => u.id == userId);
-    await user.delete();
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getStringList(usersKey) ?? [];
+    final updatedUsersJson = <String>[];
+    
+    for (String userJson in usersJson) {
+      final user = UserModel.fromJson(jsonDecode(userJson));
+      if (user.id != userId) {
+        updatedUsersJson.add(userJson);
+      }
+    }
+    
+    await prefs.setStringList(usersKey, updatedUsersJson);
   }
 } 
