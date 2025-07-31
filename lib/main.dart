@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app/app.dart';
 import 'app/service_locator/service_locator.dart';
 import 'features/auth/data/models/user_model.dart';
 import 'core/di/injection_container.dart' as di;
-import 'features/auth/presentation/view/View/login.dart';
-import 'features/home/presentation/view/HomePage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,55 +23,5 @@ void main() async {
   await di.init();
   
   await setupServiceLocator();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DairyGo',
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => LoginScreen(),
-        '/home': (context) => HomePage(),
-      },
-    );
-  }
-}
-
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
-
-  Future<bool> _checkSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-    return token != null && token.isNotEmpty;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkSession(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (snapshot.data == true) {
-          Future.microtask(() => Navigator.pushReplacementNamed(context, '/home'));
-        } else {
-          Future.microtask(() => Navigator.pushReplacementNamed(context, '/login'));
-        }
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
-      },
-    );
-  }
+  runApp(const DairyGoApp());
 }
