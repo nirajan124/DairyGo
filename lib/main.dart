@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app/app.dart';
 import 'app/service_locator/service_locator.dart';
 import 'features/auth/data/models/user_model.dart';
 import 'core/di/injection_container.dart' as di;
@@ -25,10 +24,12 @@ void main() async {
   await di.init();
   
   await setupServiceLocator();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashScreen(),
+        '/': (context) => const SplashScreen(),
         '/login': (context) => LoginScreen(),
         '/home': (context) => HomePage(),
       },
@@ -45,6 +46,8 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
   Future<bool> _checkSession() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
@@ -57,7 +60,7 @@ class SplashScreen extends StatelessWidget {
       future: _checkSession(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
@@ -66,7 +69,7 @@ class SplashScreen extends StatelessWidget {
         } else {
           Future.microtask(() => Navigator.pushReplacementNamed(context, '/login'));
         }
-        return Scaffold(
+        return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
       },
