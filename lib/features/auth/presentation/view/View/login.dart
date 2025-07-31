@@ -35,8 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
         emailController.text.trim(),
         passwordController.text.trim(),
       ));
-      final token = response['token'];
-      final userId = response['userId'];
+      
+      // Access the response data properly
+      final responseData = response.data as Map<String, dynamic>;
+      final token = responseData['token'];
+      final userId = responseData['userId'];
+      
       if (token != null && userId != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwt_token', token);

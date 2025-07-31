@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/network/api_service.dart';
-import '../view_model/homepage_viewmodel.dart';
+import '../../../../core/network/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -60,6 +58,8 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -93,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
     try {
-      final response = await ApiService().safeApiCall(() => ApiService().getProfile(userId!, token!));
+      final response = await ApiService().getProfile(userId!, token!);
       fnameController.text = response['fname'] ?? '';
       lnameController.text = response['lname'] ?? '';
       phoneController.text = response['phone'] ?? '';
@@ -122,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (token == null || userId == null) return;
     setState(() { isLoading = true; });
     try {
-      await ApiService().safeApiCall(() => ApiService().updateProfile(
+      await ApiService().updateProfile(
         userId: userId!,
         token: token!,
         fname: fnameController.text,
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         phone: phoneController.text,
         email: emailController.text,
         imagePath: profileImagePath,
-      ));
+      );
       setState(() { isEditing = false; });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -280,7 +280,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = ApiService().getProducts();
+    _productsFuture = _loadProducts();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadProducts() async {
+    try {
+      final response = await ApiService().getProducts();
+      final data = response.data as List<dynamic>;
+      return data.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw Exception('Failed to load products: $e');
+    }
   }
 
   @override
@@ -291,7 +301,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: \\${snapshot.error}'));
+          return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('No products found.'));
         }
@@ -332,12 +342,12 @@ class ProductDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Product Details')),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: ApiService().getProductDetail(productId),
+        future: _loadProductDetail(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: \\${snapshot.error}'));
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('Product not found.'));
           }
@@ -357,7 +367,7 @@ class ProductDetailScreen extends StatelessWidget {
                 Text(product['description'] ?? ''),
                 SizedBox(height: 8),
                 if (product['price'] != null)
-                  Text('Price: \\${product['price']}', style: TextStyle(fontSize: 18)),
+                  Text('Price: \$${product['price']}', style: TextStyle(fontSize: 18)),
                 SizedBox(height: 16),
                 Row(
                   children: [
@@ -378,29 +388,22 @@ class ProductDetailScreen extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final token = prefs.getString('jwt_token');
-                    if (token == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('You must be logged in to place an order.'), backgroundColor: Colors.red),
-                      );
-                      return;
-                    }
-                    int qty = int.tryParse(quantityController.text) ?? 1;
-                    try {
-                      await ApiService().placeOrder(token, productId, qty);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Order placed successfully!'), backgroundColor: Colors.green),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-                      );
-                    }
-                  },
-                  child: Text('Place Order'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _addToWishlist(context, productId),
+                        child: Text('Add to Wishlist'),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _placeOrder(context, productId, int.tryParse(quantityController.text) ?? 1),
+                        child: Text('Place Order'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -409,9 +412,59 @@ class ProductDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<Map<String, dynamic>> _loadProductDetail() async {
+    try {
+      final response = await ApiService().getProductDetail(productId);
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception('Failed to load product detail: $e');
+    }
+  }
+
+  Future<void> _addToWishlist(BuildContext context, String productId) async {
+    try {
+      await ApiService().addToWishlist(productId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added to wishlist!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to wishlist: $e')),
+      );
+    }
+  }
+
+  Future<void> _placeOrder(BuildContext context, String productId, int quantity) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('user_id');
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please login first')),
+        );
+        return;
+      }
+      await ApiService().placeOrder(
+        productId: productId,
+        quantity: quantity,
+        userId: userId,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order placed successfully!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to place order: $e')),
+      );
+    }
+  }
 }
 
 class WishlistScreen extends StatefulWidget {
+  const WishlistScreen({super.key});
+
   @override
   _WishlistScreenState createState() => _WishlistScreenState();
 }
@@ -430,10 +483,19 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString('jwt_token');
     setState(() {
-      _wishlistFuture = token != null
-          ? ApiService().getWishlist(token!)
-          : Future.value([]);
+      _wishlistFuture = _fetchWishlist();
     });
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchWishlist() async {
+    if (token == null) return [];
+    try {
+      final response = await ApiService().getWishlist();
+      final data = response.data as List<dynamic>;
+      return data.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw Exception('Failed to load wishlist: $e');
+    }
   }
 
   @override
@@ -444,7 +506,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: \\${snapshot.error}'));
+          return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('No wishlist items.'));
         }
@@ -460,8 +522,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 icon: Icon(Icons.delete, color: Colors.red),
                 onPressed: () async {
                   if (token != null && item['_id'] != null) {
-                    await ApiService().removeFromWishlist(token!, item['_id']);
-                    _loadWishlist();
+                    try {
+                      await ApiService().removeFromWishlist(item['_id']);
+                      _loadWishlist();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to remove item: $e')),
+                      );
+                    }
                   }
                 },
               ),
@@ -474,6 +542,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
 }
 
 class OrdersScreen extends StatefulWidget {
+  const OrdersScreen({super.key});
+
   @override
   _OrdersScreenState createState() => _OrdersScreenState();
 }
@@ -492,10 +562,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString('jwt_token');
     setState(() {
-      _ordersFuture = token != null
-          ? ApiService().getOrders(token!)
-          : Future.value([]);
+      _ordersFuture = _fetchOrders();
     });
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchOrders() async {
+    if (token == null) return [];
+    try {
+      final response = await ApiService().getOrders();
+      final data = response.data as List<dynamic>;
+      return data.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw Exception('Failed to load orders: $e');
+    }
   }
 
   @override
@@ -506,7 +585,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: \\${snapshot.error}'));
+          return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('No orders found.'));
         }
