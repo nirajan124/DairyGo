@@ -1,11 +1,6 @@
 {
-<<<<<<< HEAD
-    "name": "softconnect",
-    "short_name": "softconnect",
-=======
     "name": "trek",
     "short_name": "trek",
->>>>>>> master
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

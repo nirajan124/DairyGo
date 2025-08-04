@@ -62,181 +62,6 @@ class ApiService {
     // You can add navigation logic here if needed
   }
 
-  // Login method
-  Future<Response> login(String email, String password) async {
-    try {
-      final response = await _dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Register method
-  Future<Response> register({
-    required String fname,
-    required String lname,
-    required String phone,
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final response = await _dio.post('/auth/register', data: {
-        'fname': fname,
-        'lname': lname,
-        'phone': phone,
-        'email': email,
-        'password': password,
-      });
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get user profile
-  Future<Map<String, dynamic>> getProfile(String userId, String token) async {
-    try {
-      final response = await _dio.get('/customers/getCustomer', 
-        queryParameters: {'userId': userId},
-        options: Options(headers: {'Authorization': 'Bearer $token'})
-      );
-      return response.data as Map<String, dynamic>;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get products
-  Future<Response> getProducts() async {
-    try {
-      final response = await _dio.get(ApiEndpoints.products);
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get product by ID
-  Future<Response> getProductById(String productId) async {
-    try {
-      final response = await _dio.get('${ApiEndpoints.productById}$productId');
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get wishlist
-  Future<Response> getWishlist() async {
-    try {
-      final response = await _dio.get(ApiEndpoints.wishlist);
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Add to wishlist
-  Future<Response> addToWishlist(String productId) async {
-    try {
-      final response = await _dio.post(ApiEndpoints.addToWishlist, data: {
-        'productId': productId,
-      });
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Remove from wishlist
-  Future<Response> removeFromWishlist(String productId) async {
-    try {
-      final response = await _dio.delete('${ApiEndpoints.removeFromWishlist}$productId');
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get orders
-  Future<Response> getOrders() async {
-    try {
-      final response = await _dio.get(ApiEndpoints.getBookings);
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Update user profile
-  Future<Response> updateProfile({
-    required String userId,
-    required String token,
-    required String fname,
-    required String lname,
-    required String phone,
-    required String email,
-    String? imagePath,
-  }) async {
-    try {
-      final response = await _dio.put('/customers/updateCustomer', 
-        data: {
-          'userId': userId,
-          'fname': fname,
-          'lname': lname,
-          'phone': phone,
-          'email': email,
-          'imagePath': imagePath,
-        },
-        options: Options(headers: {'Authorization': 'Bearer $token'})
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Get product detail
-  Future<Response> getProductDetail(String productId) async {
-    try {
-      final response = await _dio.get('${ApiEndpoints.productById}$productId');
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Place order
-  Future<Response> placeOrder({
-    required String productId,
-    required int quantity,
-    required String userId,
-  }) async {
-    try {
-      final response = await _dio.post(ApiEndpoints.createBooking, data: {
-        'productId': productId,
-        'quantity': quantity,
-        'userId': userId,
-      });
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Safe API call wrapper
-  Future<T> safeApiCall<T>(Future<T> Function() apiCall) async {
-    try {
-      return await apiCall();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   // GET request
   Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
     try {
@@ -281,6 +106,16 @@ class ApiService {
   Future<Response> postFormData(String path, FormData formData) async {
     try {
       final response = await _dio.post(path, data: formData);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // PUT request with form data (for file uploads)
+  Future<Response> putFormData(String path, FormData formData) async {
+    try {
+      final response = await _dio.put(path, data: formData);
       return response;
     } catch (e) {
       rethrow;

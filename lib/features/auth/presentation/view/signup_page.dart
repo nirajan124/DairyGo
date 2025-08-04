@@ -50,7 +50,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SnackBar(content: Text('Registration successful! Please log in.')),
                     );
                     context.read<AuthBloc>().add(AuthResetRequested());
-                    Navigator.pushReplacementNamed(context, '/login', arguments: true);
+                    Navigator.pop(context); // Go back to login page
                   } else if (state is AuthError) {
                     _wasLoading = false;
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
@@ -103,51 +103,51 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         obscureText: true,
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _rememberMe,
-                            onChanged: (val) {
-                              setState(() {
-                                _rememberMe = val ?? false;
-                              });
-                            },
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  final firstName = _firstNameController.text.trim();
+                                  final lastName = _lastNameController.text.trim();
+                                  final email = _emailController.text.trim();
+                                  final phone = _phoneController.text.trim();
+                                  final password = _passwordController.text.trim();
+                                  
+                                  if (firstName.isNotEmpty && lastName.isNotEmpty && 
+                                      email.isNotEmpty && phone.isNotEmpty && password.isNotEmpty) {
+                                    final user = UserEntity(
+                                      firstName: firstName,
+                                      lastName: lastName,
+                                      email: email,
+                                      phone: phone,
+                                    );
+                                    context.read<AuthBloc>().add(
+                                          RegisterRequested(user, password),
+                                        );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Please fill in all fields'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          const Text("Remember me"),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text("Forgot Password?"),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                          child: state is AuthLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text('Sign Up'),
                         ),
-                        onPressed: () {
-                          final user = UserEntity(
-                            firstName: _firstNameController.text,
-                            lastName: _lastNameController.text,
-                            email: _emailController.text,
-                            phone: _phoneController.text,
-                          );
-                          context.read<AuthBloc>().add(RegisterRequested(user, _passwordController.text));
-                        },
-                        child: state is AuthLoading ? const CircularProgressIndicator() : const Text("Sign up"),
-                      ),
-                      const SizedBox(height: 10),
-                      const Center(child: Text("Already have an account?")),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/login');
-                        },
-                        child: const Text("Login here"),
                       ),
                       const SizedBox(height: 20),
                       // Test backend connection button
@@ -166,6 +166,19 @@ class _SignUpPageState extends State<SignUpPage> {
                         },
                         child: const Text("Test Backend Connection"),
                       ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Already have an account? "),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Go back to login page
+                            },
+                            child: Text('Login'),
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 },
@@ -175,5 +188,15 @@ class _SignUpPageState extends State<SignUpPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

@@ -1,24 +1,8 @@
-# DairyGo - Flutter App with Backend API
+# trek
 
-This repository contains both the Flutter mobile application and the Node.js backend API for the DairyGo project.
+A new Flutter project.
 
-## Backend API
-
-The backend API is built with Node.js and provides RESTful endpoints for the DairyGo mobile application.
-
-### Backend Features:
-- User authentication and authorization
-- Product management
-- Booking system
-- Payment integration
-- Wishlist functionality
-- Review system
-
-## Flutter App
-
-A new Flutter project for the DairyGo mobile application.
-
-### Getting Started
+## Getting Started
 
 This project is a starting point for a Flutter application.
 

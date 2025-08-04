@@ -10,7 +10,7 @@ class BackendTest {
         receiveTimeout: const Duration(seconds: 10),
       ));
 
-      // Testing backend connection to: ${ApiEndpoints.baseUrl}
+      print('Testing backend connection to: ${ApiEndpoints.baseUrl}');
       
       // Test if server is reachable
       final response = await dio.get('/customers');
@@ -44,7 +44,7 @@ class BackendTest {
         receiveTimeout: const Duration(seconds: 10),
       ));
 
-      // Testing registration endpoint: ${ApiEndpoints.register}
+      print('Testing registration endpoint: ${ApiEndpoints.register}');
       
       // Test with minimal data
       final testData = {

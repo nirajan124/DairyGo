@@ -1,8 +1,8 @@
 class ApiEndpoints {
-  // Base URL - change this to your backend URL when running
-  static const String baseUrl = 'http://10.0.2.2:3001/api/v1'; // For Android emulator
+  // Base URL - configured for both emulator and physical device
+  static const String baseUrl = 'http://192.168.1.19:3001/api/v1'; // For physical device and emulator
+  // static const String baseUrl = 'http://10.0.2.2:3001/api/v1'; // For Android emulator only
   // static const String baseUrl = 'http://localhost:3001/api/v1'; // For iOS simulator
-  // static const String baseUrl = 'http://<your-pc-ip>:3001/api/v1'; // For physical device
 
   // Auth endpoints
   static const String register = '/customers/register';
@@ -10,10 +10,6 @@ class ApiEndpoints {
   static const String getCustomer = '/customers/getCustomer';
   static const String updateCustomer = '/customers/updateCustomer';
   static const String uploadImage = '/customers/uploadImage';
-
-  // Product endpoints
-  static const String products = '/products';
-  static const String productById = '/products/';
 
   // Package/Trip endpoints
   static const String packages = '/package';
@@ -31,4 +27,7 @@ class ApiEndpoints {
 
   // Khalti payment endpoints
   static const String khaltiPayment = '/api/khalti/payment';
+
+  // Product endpoints
+  static const String products = '/products';
 } 

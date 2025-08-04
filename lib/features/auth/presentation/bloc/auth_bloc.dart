@@ -35,6 +35,8 @@ class CheckAuthStatus extends AuthEvent {}
 
 class AuthResetRequested extends AuthEvent {}
 
+class RefreshUserDataRequested extends AuthEvent {}
+
 // States
 abstract class AuthState extends Equatable {
   @override
@@ -74,6 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogoutRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<AuthResetRequested>((event, emit) => emit(AuthInitial()));
+    on<RefreshUserDataRequested>(_onRefreshUserDataRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -122,16 +125,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    final isLoggedIn = await authRepository.isLoggedIn();
-    
-    if (isLoggedIn) {
-      final result = await authRepository.getCurrentUser();
-      result.fold(
-        (failure) => emit(AuthError(failure)),
-        (user) => emit(Authenticated(user)),
-      );
-    } else {
-      emit(Unauthenticated());
+    try {
+      print('Checking auth status...');
+      final isLoggedIn = await authRepository.isLoggedIn();
+      print('Is logged in: $isLoggedIn');
+      
+      if (isLoggedIn) {
+        final result = await authRepository.getCurrentUser();
+        result.fold(
+          (failure) {
+            print('Auth error: $failure');
+            emit(AuthError(failure));
+          },
+          (user) {
+            print('User authenticated: $user');
+            emit(Authenticated(user));
+          },
+        );
+      } else {
+        print('User not logged in, showing login page');
+        emit(Unauthenticated());
+      }
+    } catch (e) {
+      print('Exception in _onCheckAuthStatus: $e');
+      emit(AuthError('Failed to check authentication status: $e'));
     }
+  }
+
+  Future<void> _onRefreshUserDataRequested(
+    RefreshUserDataRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await authRepository.getCurrentUser();
+    result.fold(
+      (failure) => emit(AuthError(failure)),
+      (user) => emit(Authenticated(user)),
+    );
   }
 } 

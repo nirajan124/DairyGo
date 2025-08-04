@@ -11,8 +11,8 @@ class ConnectionTest {
       ));
 
       // Test a simple GET request to check if server is reachable
-      final response = await dio.get('/customers');
-      // Backend connection test successful: ${response.statusCode}
+      await dio.get('/customers');
+      // Backend connection test successful
       return true;
     } catch (e) {
       // Backend connection test failed: $e

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../booking/presentation/view/bookings_page.dart';
 import 'home_content.dart';
 import '../../../profile/presentation/view/profile_page.dart';
+import '../../../cart/presentation/view/cart_page.dart';
+import '../../../orders/presentation/view/orders_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -15,7 +17,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   final List<Widget> _pages = [
     HomeContent(),
-    BookingsPage(),
+    CartPage(),
+    OrdersPage(),
     ProfilePage(),
   ];
 
@@ -42,7 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   icon: Icon(Icons.person, color: Colors.white),
                   onPressed: () {
                     setState(() {
-                      _selectedIndex = 2;
+                      _selectedIndex = 3;
                     });
                   },
                 ),
@@ -68,6 +71,10 @@ class _DashboardPageState extends State<DashboardPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Orders',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

@@ -15,9 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     // Check authentication status after a short delay
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.read<AuthBloc>().add(CheckAuthStatus());
-      }
+      context.read<AuthBloc>().add(CheckAuthStatus());
     });
   }
 
@@ -53,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   borderRadius: BorderRadius.circular(60),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),

@@ -35,7 +35,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // No longer reset AuthBloc state here
     return Scaffold(
       body: Stack(
         children: [
@@ -60,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                   if (state is Authenticated) {
                     // Clear any error SnackBars before navigating
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    Navigator.pushReplacementNamed(context, '/dashboard');
+                    // No need to navigate - AuthWrapper will handle it
                   } else if (state is AuthError) {
                     // Clear any previous SnackBars before showing a new one
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -98,32 +97,57 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {},
-                          child: const Text("Forgot Password?"),
+                          child: Text('Forgot Password?'),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () {
-                          context.read<AuthBloc>().add(LoginRequested(_usernameController.text, _passwordController.text));
-                        },
-                        child: state is AuthLoading ? CircularProgressIndicator() : const Text("Login"),
                       ),
                       const SizedBox(height: 20),
-                      const Center(child: Text("Don't have an account?", style: TextStyle(fontFamily:'Opensans Bold'))),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/signup');
-                          // Reset AuthBloc state when navigating to signup
-                          context.read<AuthBloc>().add(AuthResetRequested());
-                        },
-                        child: const Text("Sign up here"),
-                      )
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  final email = _usernameController.text.trim();
+                                  final password = _passwordController.text.trim();
+                                  if (email.isNotEmpty && password.isNotEmpty) {
+                                    context.read<AuthBloc>().add(
+                                          LoginRequested(email, password),
+                                        );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Please fill in all fields'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: state is AuthLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text('Login'),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Don't have an account? "),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/signup');
+                            },
+                            child: Text('Sign Up'),
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 },
@@ -133,5 +157,12 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

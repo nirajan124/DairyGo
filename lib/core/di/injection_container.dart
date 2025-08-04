@@ -7,6 +7,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/signup_usecase.dart';
 import '../../features/trips/data/datasources/package_remote_data_source.dart';
+import '../../features/cart/presentation/cart_cubit.dart';
 import '../../core/network/api_service.dart';
 
 final sl = GetIt.instance;
@@ -41,6 +42,9 @@ Future<void> init() async {
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => SignupUseCase(sl()));
+
+  // BLoC/Cubit
+  sl.registerLazySingleton(() => CartCubit());
 
   // Initialize API service
   sl<ApiService>().initialize();
